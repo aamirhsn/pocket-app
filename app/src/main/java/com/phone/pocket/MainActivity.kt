@@ -127,6 +127,18 @@ fun MainAppContent() {
             icon = Icons.Filled.CreditCard
         )
     )
+    // Demo state for spends and cards
+    var spends by remember { mutableStateOf(listOf<com.phone.pocket.data.Spend>()) }
+    var cards by remember { mutableStateOf(listOf<com.phone.pocket.data.Card>()) }
+    fun editCard(card: com.phone.pocket.data.Card) {
+        cards = cards.map { if (it.name == card.name) card else it }
+    }
+    fun deleteCard(card: com.phone.pocket.data.Card) {
+        cards = cards.filter { it.name != card.name }
+    }
+    fun deleteSpend(spend: com.phone.pocket.data.Spend) {
+        spends = spends.filter { it != spend }
+    }
     Scaffold(
         bottomBar = {
             FrostedNavBar {
@@ -156,8 +168,23 @@ fun MainAppContent() {
             startDestination = "spend_tracker",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("spend_tracker") { SpendTrackerScreen() }
-            composable("cards") { CardsScreen() }
+            composable("spend_tracker") {
+                SpendTrackerScreen(
+                    spends = spends,
+                    onAddSpend = { spend -> spends = spends + spend },
+                    onDeleteSpend = { spend -> deleteSpend(spend) },
+                    cards = cards // Pass cards to SpendTrackerScreen
+                )
+            }
+            composable("cards") {
+                CardsScreen(
+                    cards = cards,
+                    spends = spends,
+                    onAddCard = { card -> cards = cards + card },
+                    onEditCard = { card -> editCard(card) },
+                    onDeleteCard = { card -> deleteCard(card) }
+                )
+            }
         }
     }
 }
